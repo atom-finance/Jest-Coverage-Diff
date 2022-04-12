@@ -17,19 +17,14 @@ async function run(): Promise<void> {
     const fullCoverage = JSON.parse(core.getInput('fullCoverageDiff'))
     const commandToRun = core.getInput('runCommand')
     const commandAfterSwitch = core.getInput('afterSwitchCommand')
-    const delta = Number(core.getInput('delta'))
-    const rawTotalDelta = core.getInput('total_delta')
     const githubClient = github.getOctokit(githubToken)
     const prNumber = github.context.issue.number
     const branchNameBase = github.context.payload.pull_request?.base.ref
     const branchNameHead = github.context.payload.pull_request?.head.ref
-    const useSameComment = JSON.parse(core.getInput('useSameComment'))
     const commentIdentifier = `<!-- codeCoverageDiffComment -->`
-    const deltaCommentIdentifier = `<!-- codeCoverageDeltaComment -->`
-    let totalDelta = null
-    if (rawTotalDelta !== null) {
-      totalDelta = Number(rawTotalDelta)
-    }
+
+    console.log(github.context)
+
     let commentId = null
     execSync(commandToRun)
     const codeCoverageNew = <CoverageReport>(
@@ -67,15 +62,6 @@ async function run(): Promise<void> {
       messageToPost += coverageDetails.join('\n')
     }
     messageToPost = `${commentIdentifier}\nCommit SHA:${commitSha}\n${messageToPost}`
-    if (useSameComment) {
-      commentId = await findComment(
-        githubClient,
-        repoName,
-        repoOwner,
-        prNumber,
-        commentIdentifier
-      )
-    }
     await createOrUpdateComment(
       commentId,
       githubClient,
@@ -84,30 +70,6 @@ async function run(): Promise<void> {
       messageToPost,
       prNumber
     )
-
-    // check if the test coverage is falling below delta/tolerance.
-    if (diffChecker.checkIfTestCoverageFallsBelowDelta(delta, totalDelta)) {
-      if (useSameComment) {
-        commentId = await findComment(
-          githubClient,
-          repoName,
-          repoOwner,
-          prNumber,
-          deltaCommentIdentifier
-        )
-      }
-      messageToPost = `Current PR reduces the test coverage percentage by ${delta} for some tests`
-      messageToPost = `${deltaCommentIdentifier}\nCommit SHA:${commitSha}\n${messageToPost}`
-      await createOrUpdateComment(
-        commentId,
-        githubClient,
-        repoOwner,
-        repoName,
-        messageToPost,
-        prNumber
-      )
-      throw Error(messageToPost)
-    }
   } catch (error) {
     core.setFailed(error)
   }
@@ -137,28 +99,6 @@ async function createOrUpdateComment(
       issue_number: prNumber
     })
   }
-}
-
-async function findComment(
-  githubClient: {[x: string]: any} & {[x: string]: any} & Octokit &
-    RestEndpointMethods & {paginate: PaginateInterface},
-  repoName: string,
-  repoOwner: string,
-  prNumber: number,
-  identifier: string
-): Promise<number> {
-  const comments = await githubClient.issues.listComments({
-    owner: repoOwner,
-    repo: repoName,
-    issue_number: prNumber
-  })
-
-  for (const comment of comments.data) {
-    if (comment.body.startsWith(identifier)) {
-      return comment.id
-    }
-  }
-  return 0
 }
 
 run()
