@@ -19,11 +19,13 @@ async function run(): Promise<void> {
     const commandAfterSwitch = core.getInput('afterSwitchCommand')
     const githubClient = github.getOctokit(githubToken)
     const prNumber = github.context.issue.number
-    const branchNameBase = github.context.payload.pull_request?.base.ref
     const branchNameHead = github.context.payload.pull_request?.head.ref
     const commentIdentifier = `<!-- codeCoverageDiffComment -->`
 
     console.log(github.context)
+    const branchNameBase = execSync(
+      'git merge-base --fork-point origin/$BASE_BRANCH'
+    ).toString()
 
     let commentId = null
     execSync(commandToRun)
