@@ -22,7 +22,6 @@ async function run(): Promise<void> {
     const branchNameHead = github.context.payload.pull_request?.head.ref
     const commentIdentifier = `<!-- codeCoverageDiffComment -->`
 
-    console.log(github.context)
     const branchNameBase = execSync(
       'git merge-base --fork-point origin/$BASE_BRANCH'
     ).toString()
