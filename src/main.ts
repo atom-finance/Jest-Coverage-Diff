@@ -20,7 +20,6 @@ async function run(): Promise<void> {
     const prNumber = github.context.issue.number
     const commentIdentifier = `<!-- codeCoverageDiffComment -->`
 
-    let commentId = null
     execSync(commandToRun)
     const codeCoverageNew = <CoverageReport>(
       JSON.parse(fs.readFileSync('coverage-summary.json').toString())
@@ -63,42 +62,14 @@ async function run(): Promise<void> {
       messageToPost += coverageDetails.join('\n')
     }
     messageToPost = `${commentIdentifier}\nCommit SHA: ${process.env.$HEAD_SHA}\n${messageToPost}`
-    await createOrUpdateComment(
-      commentId,
-      githubClient,
-      repoOwner,
-      repoName,
-      messageToPost,
-      prNumber
-    )
-  } catch (error) {
-    core.setFailed(error)
-  }
-}
-
-async function createOrUpdateComment(
-  commentId: number | null,
-  githubClient: {[x: string]: any} & {[x: string]: any} & Octokit &
-    RestEndpointMethods & {paginate: PaginateInterface},
-  repoOwner: string,
-  repoName: string,
-  messageToPost: string,
-  prNumber: number
-) {
-  if (commentId) {
-    await githubClient.issues.updateComment({
-      owner: repoOwner,
-      repo: repoName,
-      comment_id: commentId,
-      body: messageToPost
-    })
-  } else {
     await githubClient.issues.createComment({
       repo: repoName,
       owner: repoOwner,
       body: messageToPost,
       issue_number: prNumber
     })
+  } catch (error) {
+    core.setFailed(error)
   }
 }
 
