@@ -22,17 +22,19 @@ async function run(): Promise<void> {
     const branchNameHead = github.context.payload.pull_request?.head.ref
     const commentIdentifier = `<!-- codeCoverageDiffComment -->`
 
-    const branchNameBase = execSync(
-      'git merge-base --fork-point origin/$BASE_BRANCH'
-    ).toString()
-
     let commentId = null
     execSync(commandToRun)
     const codeCoverageNew = <CoverageReport>(
       JSON.parse(fs.readFileSync('coverage-summary.json').toString())
     )
+
     execSync('/usr/bin/git fetch')
     execSync('/usr/bin/git stash')
+
+    const branchNameBase = execSync(
+      'git merge-base --fork-point origin/$BASE_BRANCH'
+    ).toString()
+
     execSync(`/usr/bin/git checkout --progress --force ${branchNameBase}`)
     if (commandAfterSwitch) {
       execSync(commandAfterSwitch)
