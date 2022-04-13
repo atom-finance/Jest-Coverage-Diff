@@ -32,7 +32,7 @@ async function run(): Promise<void> {
     execSync('/usr/bin/git stash')
 
     const branchNameBase = execSync(
-      'git merge-base --fork-point origin/$BASE_BRANCH'
+      '/usr/bin/git merge-base --fork-point origin/$BASE_BRANCH'
     ).toString()
 
     execSync(`/usr/bin/git checkout --progress --force ${branchNameBase}`)

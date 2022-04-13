@@ -450,7 +450,7 @@ function run() {
             const codeCoverageNew = (JSON.parse(fs_1.default.readFileSync('coverage-summary.json').toString()));
             child_process_1.execSync('/usr/bin/git fetch');
             child_process_1.execSync('/usr/bin/git stash');
-            const branchNameBase = child_process_1.execSync('git merge-base --fork-point origin/$BASE_BRANCH').toString();
+            const branchNameBase = child_process_1.execSync('/usr/bin/git merge-base --fork-point origin/$BASE_BRANCH').toString();
             child_process_1.execSync(`/usr/bin/git checkout --progress --force ${branchNameBase}`);
             if (commandAfterSwitch) {
                 child_process_1.execSync(commandAfterSwitch);
