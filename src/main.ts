@@ -58,7 +58,7 @@ async function run(): Promise<void> {
         'No changes to code coverage between the base branch and the head branch'
     } else {
       messageToPost +=
-        'Status | File | % Stmts | % Branch | % Funcs | % Lines \n -----|-----|---------|----------|---------|------ \n'
+        'Status | File | % Stmts | % Branch | % Funcs | % Lines \n :---:|-----|---------|----------|---------|------ \n'
       messageToPost += coverageDetails.join('\n')
     }
     messageToPost = `${commentIdentifier}\nCommit SHA: ${process.env['HEAD_SHA']}\n${messageToPost}`

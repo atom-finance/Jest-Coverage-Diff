@@ -466,7 +466,7 @@ function run() {
             }
             else {
                 messageToPost +=
-                    'Status | File | % Stmts | % Branch | % Funcs | % Lines \n -----|-----|---------|----------|---------|------ \n';
+                    'Status | File | % Stmts | % Branch | % Funcs | % Lines \n :---:|-----|---------|----------|---------|------ \n';
                 messageToPost += coverageDetails.join('\n');
             }
             messageToPost = `${commentIdentifier}\nCommit SHA: ${process.env['HEAD_SHA']}\n${messageToPost}`;
