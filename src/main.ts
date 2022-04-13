@@ -12,14 +12,12 @@ async function run(): Promise<void> {
   try {
     const repoName = github.context.repo.repo
     const repoOwner = github.context.repo.owner
-    const commitSha = github.context.sha
     const githubToken = core.getInput('accessToken')
     const fullCoverage = JSON.parse(core.getInput('fullCoverageDiff'))
     const commandToRun = core.getInput('runCommand')
     const commandAfterSwitch = core.getInput('afterSwitchCommand')
     const githubClient = github.getOctokit(githubToken)
     const prNumber = github.context.issue.number
-    const branchNameHead = github.context.payload.pull_request?.head.ref
     const commentIdentifier = `<!-- codeCoverageDiffComment -->`
 
     let commentId = null
@@ -31,7 +29,7 @@ async function run(): Promise<void> {
     execSync('/usr/bin/git fetch')
     execSync('/usr/bin/git stash')
 
-    // sha where head forks from base
+    // Find SHA where head forks from base.
     const branchNameBase = execSync(
       '/usr/bin/git merge-base -a $HEAD_SHA $BASE_SHA'
     ).toString()
@@ -51,8 +49,7 @@ async function run(): Promise<void> {
       codeCoverageNew,
       codeCoverageOld
     )
-    let messageToPost = `## Test coverage results :test_tube: \n
-    Code coverage diff between base branch:${branchNameBase} and head branch: ${branchNameHead} \n\n`
+    let messageToPost = '## Test coverage results\n'
     const coverageDetails = diffChecker.getCoverageDetails(
       !fullCoverage,
       `${currentDirectory}/`
@@ -65,7 +62,7 @@ async function run(): Promise<void> {
         'Status | File | % Stmts | % Branch | % Funcs | % Lines \n -----|-----|---------|----------|---------|------ \n'
       messageToPost += coverageDetails.join('\n')
     }
-    messageToPost = `${commentIdentifier}\nCommit SHA:${commitSha}\n${messageToPost}`
+    messageToPost = `${commentIdentifier}\nCommit SHA: ${process.env.$HEAD_SHA}\n${messageToPost}`
     await createOrUpdateComment(
       commentId,
       githubClient,

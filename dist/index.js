@@ -431,26 +431,23 @@ const child_process_1 = __webpack_require__(129);
 const fs_1 = __importDefault(__webpack_require__(747));
 const DiffChecker_1 = __webpack_require__(563);
 function run() {
-    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const repoName = github.context.repo.repo;
             const repoOwner = github.context.repo.owner;
-            const commitSha = github.context.sha;
             const githubToken = core.getInput('accessToken');
             const fullCoverage = JSON.parse(core.getInput('fullCoverageDiff'));
             const commandToRun = core.getInput('runCommand');
             const commandAfterSwitch = core.getInput('afterSwitchCommand');
             const githubClient = github.getOctokit(githubToken);
             const prNumber = github.context.issue.number;
-            const branchNameHead = (_a = github.context.payload.pull_request) === null || _a === void 0 ? void 0 : _a.head.ref;
             const commentIdentifier = `<!-- codeCoverageDiffComment -->`;
             let commentId = null;
             child_process_1.execSync(commandToRun);
             const codeCoverageNew = (JSON.parse(fs_1.default.readFileSync('coverage-summary.json').toString()));
             child_process_1.execSync('/usr/bin/git fetch');
             child_process_1.execSync('/usr/bin/git stash');
-            // sha where head forks from base
+            // Find SHA where head forks from base.
             const branchNameBase = child_process_1.execSync('/usr/bin/git merge-base -a $HEAD_SHA $BASE_SHA').toString();
             child_process_1.execSync(`/usr/bin/git checkout --progress --force ${branchNameBase}`);
             if (commandAfterSwitch) {
@@ -462,8 +459,7 @@ function run() {
                 .toString()
                 .trim();
             const diffChecker = new DiffChecker_1.DiffChecker(codeCoverageNew, codeCoverageOld);
-            let messageToPost = `## Test coverage results :test_tube: \n
-    Code coverage diff between base branch:${branchNameBase} and head branch: ${branchNameHead} \n\n`;
+            let messageToPost = '## Test coverage results\n';
             const coverageDetails = diffChecker.getCoverageDetails(!fullCoverage, `${currentDirectory}/`);
             if (coverageDetails.length === 0) {
                 messageToPost =
@@ -474,7 +470,7 @@ function run() {
                     'Status | File | % Stmts | % Branch | % Funcs | % Lines \n -----|-----|---------|----------|---------|------ \n';
                 messageToPost += coverageDetails.join('\n');
             }
-            messageToPost = `${commentIdentifier}\nCommit SHA:${commitSha}\n${messageToPost}`;
+            messageToPost = `${commentIdentifier}\nCommit SHA: ${process.env.$HEAD_SHA}\n${messageToPost}`;
             yield createOrUpdateComment(commentId, githubClient, repoOwner, repoName, messageToPost, prNumber);
         }
         catch (error) {
