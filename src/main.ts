@@ -31,8 +31,9 @@ async function run(): Promise<void> {
     execSync('/usr/bin/git fetch')
     execSync('/usr/bin/git stash')
 
+    // sha where head forks from base
     const branchNameBase = execSync(
-      '/usr/bin/git merge-base --fork-point origin/$BASE_BRANCH'
+      '/usr/bin/git merge-base -a $HEAD_SHA $BASE_SHA'
     ).toString()
 
     execSync(`/usr/bin/git checkout --progress --force ${branchNameBase}`)
