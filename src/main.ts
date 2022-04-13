@@ -61,7 +61,7 @@ async function run(): Promise<void> {
         'Status | File | % Stmts | % Branch | % Funcs | % Lines \n -----|-----|---------|----------|---------|------ \n'
       messageToPost += coverageDetails.join('\n')
     }
-    messageToPost = `${commentIdentifier}\nCommit SHA: ${process.env.$HEAD_SHA}\n${messageToPost}`
+    messageToPost = `${commentIdentifier}\nCommit SHA: ${process.env['HEAD_SHA']}\n${messageToPost}`
     await githubClient.issues.createComment({
       repo: repoName,
       owner: repoOwner,

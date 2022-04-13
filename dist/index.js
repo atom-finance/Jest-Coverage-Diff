@@ -442,7 +442,6 @@ function run() {
             const githubClient = github.getOctokit(githubToken);
             const prNumber = github.context.issue.number;
             const commentIdentifier = `<!-- codeCoverageDiffComment -->`;
-            let commentId = null;
             child_process_1.execSync(commandToRun);
             const codeCoverageNew = (JSON.parse(fs_1.default.readFileSync('coverage-summary.json').toString()));
             child_process_1.execSync('/usr/bin/git fetch');
@@ -470,31 +469,16 @@ function run() {
                     'Status | File | % Stmts | % Branch | % Funcs | % Lines \n -----|-----|---------|----------|---------|------ \n';
                 messageToPost += coverageDetails.join('\n');
             }
-            messageToPost = `${commentIdentifier}\nCommit SHA: ${process.env.$HEAD_SHA}\n${messageToPost}`;
-            yield createOrUpdateComment(commentId, githubClient, repoOwner, repoName, messageToPost, prNumber);
-        }
-        catch (error) {
-            core.setFailed(error);
-        }
-    });
-}
-function createOrUpdateComment(commentId, githubClient, repoOwner, repoName, messageToPost, prNumber) {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (commentId) {
-            yield githubClient.issues.updateComment({
-                owner: repoOwner,
-                repo: repoName,
-                comment_id: commentId,
-                body: messageToPost
-            });
-        }
-        else {
+            messageToPost = `${commentIdentifier}\nCommit SHA: ${process.env['HEAD_SHA']}\n${messageToPost}`;
             yield githubClient.issues.createComment({
                 repo: repoName,
                 owner: repoOwner,
                 body: messageToPost,
                 issue_number: prNumber
             });
+        }
+        catch (error) {
+            core.setFailed(error);
         }
     });
 }
